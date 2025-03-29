@@ -7,6 +7,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   result: number | null = null;
+  title = 'ai-lab';
 
   onCalculate(result: number) {
     this.result = result;
