@@ -1,0 +1,38 @@
+<div class="calculator">
+  <div class="display">
+    {{ displayValue }}
+  </div>
+  <div class="buttons">
+    <table>
+      <tr>
+        <td><button (click)="clear()">C</button></td>
+        <td><button (click)="toggleSign()">+/-</button></td>
+        <td><button (click)="inputDigit('%')">%</button></td>
+        <td><button (click)="inputDigit('/')">/</button></td>
+      </tr>
+      <tr>
+        <td><button (click)="inputDigit('7')">7</button></td>
+        <td><button (click)="inputDigit('8')">8</button></td>
+        <td><button (click)="inputDigit('9')">9</button></td>
+        <td><button (click)="inputDigit('*')">*</button></td>
+      </tr>
+      <tr>
+        <td><button (click)="inputDigit('4')">4</button></td>
+        <td><button (click)="inputDigit('5')">5</button></td>
+        <td><button (click)="inputDigit('6')">6</button></td>
+        <td><button (click)="inputDigit('-')">-</button></td>
+      </tr>
+      <tr>
+        <td><button (click)="inputDigit('1')">1</button></td>
+        <td><button (click)="inputDigit('2')">2</button></td>
+        <td><button (click)="inputDigit('3')">3</button></td>
+        <td><button (click)="inputDigit('+')">+</button></td>
+      </tr>
+      <tr>
+        <td colspan="2"><button (click)="inputDigit('0')">0</button></td>
+        <td><button (click)="inputDigit('.')">.</button></td>
+        <td><button (click)="calculateResult()">=</button></td>
+      </tr>
+    </table>
+  </div>
+</div>
