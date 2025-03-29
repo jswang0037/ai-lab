@@ -3,36 +3,34 @@
     {{ displayValue }}
   </div>
   <div class="buttons">
-    <table>
-      <tr>
-        <td><button (click)="clear()">C</button></td>
-        <td><button (click)="toggleSign()">+/-</button></td>
-        <td><button (click)="inputDigit('%')">%</button></td>
-        <td><button (click)="inputDigit('/')">/</button></td>
-      </tr>
-      <tr>
-        <td><button (click)="inputDigit('7')">7</button></td>
-        <td><button (click)="inputDigit('8')">8</button></td>
-        <td><button (click)="inputDigit('9')">9</button></td>
-        <td><button (click)="inputDigit('*')">*</button></td>
-      </tr>
-      <tr>
-        <td><button (click)="inputDigit('4')">4</button></td>
-        <td><button (click)="inputDigit('5')">5</button></td>
-        <td><button (click)="inputDigit('6')">6</button></td>
-        <td><button (click)="inputDigit('-')">-</button></td>
-      </tr>
-      <tr>
-        <td><button (click)="inputDigit('1')">1</button></td>
-        <td><button (click)="inputDigit('2')">2</button></td>
-        <td><button (click)="inputDigit('3')">3</button></td>
-        <td><button (click)="inputDigit('+')">+</button></td>
-      </tr>
-      <tr>
-        <td colspan="2"><button (click)="inputDigit('0')">0</button></td>
-        <td><button (click)="inputDigit('.')">.</button></td>
-        <td><button (click)="calculateResult()">=</button></td>
-      </tr>
-    </table>
+    <div class="row">
+      <button class="function" (click)="clear()">C</button>
+      <button class="function" (click)="toggleSign()">+/-</button>
+      <button class="function" (click)="inputDigit('%')">%</button>
+      <button class="operator" (click)="inputDigit('/')">/</button>
+    </div>
+    <div class="row">
+      <button class="digit" (click)="inputDigit('7')">7</button>
+      <button class="digit" (click)="inputDigit('8')">8</button>
+      <button class="digit" (click)="inputDigit('9')">9</button>
+      <button class="operator" (click)="inputDigit('*')">*</button>
+    </div>
+    <div class="row">
+      <button class="digit" (click)="inputDigit('4')">4</button>
+      <button class="digit" (click)="inputDigit('5')">5</button>
+      <button class="digit" (click)="inputDigit('6')">6</button>
+      <button class="operator" (click)="inputDigit('-')">-</button>
+    </div>
+    <div class="row">
+      <button class="digit" (click)="inputDigit('1')">1</button>
+      <button class="digit" (click)="inputDigit('2')">2</button>
+      <button class="digit" (click)="inputDigit('3')">3</button>
+      <button class="operator" (click)="inputDigit('+')">+</button>
+    </div>
+    <div class="row">
+      <button class="digit zero" (click)="inputDigit('0')">0</button>
+      <button class="digit" (click)="inputDigit('.')">.</button>
+      <button class="operator equals" (click)="calculateResult()">=</button>
+    </div>
   </div>
 </div>
