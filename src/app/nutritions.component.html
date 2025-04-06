@@ -1,0 +1,25 @@
+<div>
+  <h2>Nutrition Plan</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Target Calories</th>
+        <th>Protein (g)</th>
+        <th>Carbs (g)</th>
+        <th>Fat (g)</th>
+        <th>Water (L)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let day of nutritionPlan">
+        <td>{{ day.date }}</td>
+        <td>{{ day.targetCalories }}</td>
+        <td>{{ day.protein }}</td>
+        <td>{{ day.carbohydrates }}</td>
+        <td>{{ day.fat }}</td>
+        <td>{{ day.waterIntake }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

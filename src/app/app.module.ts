@@ -4,10 +4,14 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { TrainingComponent } from './training.component';
+import { NutritionsComponent } from './nutritions.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    TrainingComponent,
+    NutritionsComponent
   ],
   imports: [
     BrowserModule,
