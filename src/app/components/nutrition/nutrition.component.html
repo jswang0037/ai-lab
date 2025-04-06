@@ -1,0 +1,23 @@
+<div *ngIf="nutritionPlan">
+  <h1>{{ nutritionPlan.notes}}</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Target Calories (Kcal)</th>
+        <th>Protein (g)</th>
+        <th>Carbs (g)</th>
+        <th>Fat (g)</th>
+        <th>Water (Lml)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ nutritionPlan.dailyTargets.targetCalories }}</td>
+        <td>{{ nutritionPlan.dailyTargets.proteinInGrams }}</td>
+        <td>{{ nutritionPlan.dailyTargets.carbohydrateInGrams }}</td>
+        <td>{{ nutritionPlan.dailyTargets.fatInGrams }}</td>
+        <td>{{ nutritionPlan.dailyTargets.waterInMilliliters }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+
+import { DailyNutrition } from './components/nutrition/nutrition.component';
+import { ExercisePlan } from './components/training/training.component';
 import { HtmlService } from './services/html.service';
-import { TrainingComponent, WeeklyPlan } from './training.component';
-import { NutritionsComponent, DailyNutrition } from './nutritions.component';
+import { HttpClient } from '@angular/common/http';
 
 interface Question {
   text: string;
@@ -49,14 +50,14 @@ export class AppComponent implements OnInit {
   url = 'http://localhost:8000';
   isLoading = true;
 
-  exercisePlan: WeeklyPlan[] = []; // Initialize with empty array
-  nutritionPlan: DailyNutrition[] = []; // Initialize with empty array
+  exercisePlan!: ExercisePlan; // Initialize with empty array
+  nutritionPlan! : DailyNutrition; // Initialize with empty array
 
 
   submit() {
     const response = this.htmlService.getRadioChecked('options');
+    this.userTextInput = ''
     this.chat(response);
-    this.htmlService.setInputValue('question-text-input', '');
   }
 
   parseQuestion(text: string) {
@@ -64,44 +65,20 @@ export class AppComponent implements OnInit {
       text: text
     };
     this.http.post(this.url + '/parse', body).subscribe(res => {
+      console.log(res)
       if (Array.isArray(res) && res.length > 0 && 'text' in res[0] && 'options' in res[0]) {
         this.questions = res as Question[];
       } else {
-        if (res && typeof res === 'object') {
-          if ('exercise_plan' in res && res.exercise_plan && 'weeklySchedule' in res.exercise_plan) {
-            this.exercisePlan = this.mapExercisePlan(res.exercise_plan.weeklySchedule);
-          }
-          if ('nutritionPlan' in res && res.nutritionPlan && 'dailyTargets' in res.nutritionPlan) {
-            this.nutritionPlan = this.mapNutritionPlan(res.nutritionPlan);
-          }
+        console.log('exercisePlan' in res)
+        if ('exercisePlan' in res) {
+          this.exercisePlan = res.exercisePlan as ExercisePlan;
+        }
+        if ('nutritionPlan' in res) {
+          this.nutritionPlan = res.nutritionPlan as DailyNutrition;
         }
       }
       this.isLoading = false;
     });
-  }
-
-  mapExercisePlan(weeklySchedule: any[]): WeeklyPlan[] {
-    return weeklySchedule.map(day => ({
-      day: day.dayOfWeek,
-      exercises: day.mainWorkout.map((exercise: any) => ({
-        name: exercise.exerciseName,
-        sets: exercise.targetSets,
-        reps: typeof exercise.targetReps === 'string' ? 0 : exercise.targetReps, // Handle "AMRAP"
-        weight: exercise.targetWeightKg
-      }))
-    }));
-  }
-
-  mapNutritionPlan(nutritionPlan: any): DailyNutrition[] {
-    // Assuming dailyTargets is an object with the required information
-    return [{
-      date: nutritionPlan.startDate, // You might need a way to handle multiple days
-      targetCalories: nutritionPlan.dailyTargets.targetCalories,
-      protein: nutritionPlan.dailyTargets.macronutrients.proteinGrams,
-      carbohydrates: nutritionPlan.dailyTargets.macronutrients.carbohydrateGrams,
-      fat: nutritionPlan.dailyTargets.macronutrients.fatGrams,
-      waterIntake: nutritionPlan.dailyTargets.waterIntakeMilliliters / 1000 // Convert to liters
-    }];
   }
 
 

@@ -1,0 +1,30 @@
+<div *ngIf="exercisePlan">
+  <h1>{{ exercisePlan.notes}}</h1>
+  <div *ngFor="let dayPlan of exercisePlan.weeklySchedule">
+    <h2>{{ dayPlan.dayOfWeek }}</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Exercise</th>
+          <th>Equipment</th>
+          <th>Sets</th>
+          <th>Reps</th>
+          <th>Weight (kg)</th>
+          <th>Rest (seconds)</th>
+          <th>Instructions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let exercise of dayPlan.exercises">
+          <td>{{ exercise.name }}</td>
+          <td>{{ exercise.equipment }}</td>
+          <td>{{ exercise.sets }}</td>
+          <td>{{ exercise.reps }}</td>
+          <td>{{ exercise.weightInKgs }}</td>
+          <td>rest {{exercise.restBetweenSetsSeconds}}</td>
+          <td>{{exercise.instructions}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
