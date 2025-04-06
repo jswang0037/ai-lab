@@ -1,2 +1,27 @@
-<app-calculator (calculate)="onCalculate($event)"></app-calculator>
-<app-result [result]="result"></app-result>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          Question Pad
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label for="question" class="form-label">Enter your question:</label>
+            <input type="text" class="form-control" id="question" [(ngModel)]="question">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Select an option:</label>
+            <div *ngFor="let option of options; let i = index" class="form-check">
+              <input class="form-check-input" type="radio" name="options" [id]="'option' + i" [value]="option" [(ngModel)]="selectedOption">
+              <label class="form-check-label" [for]="'option' + i">{{ option }}</label>
+            </div>
+          </div>
+          <div class="d-grid">
+            <button class="btn btn-primary" type="button" (click)="submitQuestion()">Submit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

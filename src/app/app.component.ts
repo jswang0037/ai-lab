@@ -6,10 +6,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  result: number | null = null;
   title = 'ai-lab';
+  question: string = '';
+  options: string[] = ["option A", "option B"];
+  selectedOption: string = '';
 
-  onCalculate(result: number) {
-    this.result = result;
+  submitQuestion() {
+    // Handle question submission here
+    console.log('Question submitted:', this.question, 'Option selected:', this.selectedOption);
   }
 }
