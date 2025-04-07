@@ -69,13 +69,18 @@ export class AppComponent implements OnInit {
       if (Array.isArray(res) && res.length > 0 && 'text' in res[0] && 'options' in res[0]) {
         this.questions = res as Question[];
       } else {
-        console.log('exercisePlan' in res)
         if ('exercisePlan' in res) {
           this.exercisePlan = res.exercisePlan as ExercisePlan;
         }
         if ('nutritionPlan' in res) {
           this.nutritionPlan = res.nutritionPlan as DailyNutrition;
         }
+        this.questions = [
+          {
+            text: "需要進行什麼樣的調整？",
+            options: []
+          }
+        ];
       }
       this.isLoading = false;
     });

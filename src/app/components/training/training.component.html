@@ -1,94 +1,86 @@
-<div *ngIf="exercisePlan">
 <div *ngIf="exercisePlan" class="training-container">
   <h1>{{ exercisePlan.notes }}</h1>
   <div *ngFor="let dayPlan of exercisePlan.weeklySchedule" class="day-plan-card">
     <h2>{{ dayPlan.dayOfWeek }}</h2>
-+   <h3>{{dayPlan.workoutType}}</h3>
--            <th>Equipment</th>
-+
-+<div *ngIf="exercisePlan" class="training-container">
-+  <h1>{{ exercisePlan.notes }}</h1>
-+  <div *ngFor="let dayPlan of exercisePlan.weeklySchedule" class="day-plan-card">
-+    <h2>{{ dayPlan.dayOfWeek }}</h2>
-+    <div class="exercise-table-container">
-+      <table>
-+        <thead>
-+          <tr>
-+            <th>Exercise</th>
-+            <th>Equipment</th>
-+            <th>Sets</th>
-+            <th>Reps</th>
-+            <th>Weight (kg)</th>
-+            <th>Rest (seconds)</th>
-+            <th>Instructions</th>
-+          </tr>
-+        </thead>
-+        <tbody>
-+          <tr *ngFor="let exercise of dayPlan.exercises">
-+            <td>{{ exercise.name }}</td>
-+            <td>{{ exercise.equipment }}</td>
-+            <td>{{ exercise.sets }}</td>
-+            <td>{{ exercise.reps }}</td>
-+            <td>{{ exercise.weightInKgs }}</td>
-+            <td>rest {{ exercise.restBetweenSetsSeconds }}</td>
-+            <td>{{ exercise.instructions }}</td>
-+          </tr>
-+        </tbody>
-+      </table>
-+    </div>
-+  </div>
-+
-+  <div class="workout-form">
-+    <h2>Add Exercise</h2>
-+    <form (ngSubmit)="addExercise()" #exerciseForm="ngForm">
-+      <div class="form-group">
-+        <label for="exerciseName">Exercise Name:</label>
-+        <input type="text" id="exerciseName" name="exerciseName" [(ngModel)]="newExercise.name" required #exerciseName="ngModel">
-+        <div *ngIf="exerciseName.invalid && (exerciseName.dirty || exerciseName.touched)" class="error">
-+          <div *ngIf="exerciseName.errors?.['required']">
-+            Exercise name is required.
-+          </div>
-+        </div>
-+      </div>
-+      <div class="form-group">
-+        <label for="sets">Sets:</label>
-+        <input type="number" id="sets" name="sets" [(ngModel)]="newExercise.sets" required #sets="ngModel" min="1">
-+        <div *ngIf="sets.invalid && (sets.dirty || sets.touched)" class="error">
-+          <div *ngIf="sets.errors?.['required']">
-+            Sets are required.
-+          </div>
-+          <div *ngIf="sets.errors?.['min']">
-+            Sets must be at least 1.
-+          </div>
-+        </div>
-+      </div>
-+      <div class="form-group">
-+        <label for="reps">Reps:</label>
-+        <input type="number" id="reps" name="reps" [(ngModel)]="newExercise.reps" required #reps="ngModel" min="1">
-+        <div *ngIf="reps.invalid && (reps.dirty || reps.touched)" class="error">
-+          <div *ngIf="reps.errors?.['required']">
-+            Reps are required.
-+          </div>
-+          <div *ngIf="reps.errors?.['min']">
-+            Reps must be at least 1.
-+          </div>
-+        </div>
-+      </div>
-+      <div class="form-group">
-+        <label for="weight">Weight (kg):</label>
-+        <input type="number" id="weight" name="weight" [(ngModel)]="newExercise.weightInKgs">
-+      </div>
-+      <div class="form-group">
-+        <label for="rest">Rest Time (seconds):</label>
-+        <input type="number" id="rest" name="rest" [(ngModel)]="newExercise.restBetweenSetsSeconds">
-+      </div>
-+      <div class="form-group">
-+        <label for="notes">Notes:</label>
-+        <textarea id="notes" name="notes" [(ngModel)]="newExercise.instructions"></textarea>
-+      </div>
-+      <button type="submit" [disabled]="exerciseForm.invalid">Add</button>
-+    </form>
-+  </div>
-+</div>
-+
-+
+    <h2>{{ dayPlan.workoutType }}</h2>
+    <div class="exercise-table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Exercise</th>
+            <th>Equipment</th>
+            <th>Sets</th>
+            <th>Reps</th>
+            <th>Weight (kg)</th>
+            <th>Rest (seconds)</th>
+            <th>Instructions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let exercise of dayPlan.exercises">
+            <td>{{ exercise.name }}</td>
+            <td>{{ exercise.equipment }}</td>
+            <td>{{ exercise.sets }}</td>
+            <td>{{ exercise.reps }}</td>
+            <td>{{ exercise.weightInKgs }}</td>
+            <td>{{ exercise.restBetweenSetsSeconds }}</td>
+            <td>{{ exercise.instructions }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="workout-form">
+    <h2>Add Exercise</h2>
+    <form (ngSubmit)="addExercise()" #exerciseForm="ngForm">
+      <div class="form-group">
+        <label for="exerciseName">Exercise Name:</label>
+        <input type="text" id="exerciseName" name="exerciseName" [(ngModel)]="newExercise.name" required #exerciseName="ngModel">
+        <div *ngIf="exerciseName.invalid && (exerciseName.dirty || exerciseName.touched)" class="error">
+          <div *ngIf="exerciseName.errors?.['required']">
+            Exercise name is required.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="sets">Sets:</label>
+        <input type="number" id="sets" name="sets" [(ngModel)]="newExercise.sets" required #sets="ngModel" min="1">
+        <div *ngIf="sets.invalid && (sets.dirty || sets.touched)" class="error">
+          <div *ngIf="sets.errors?.['required']">
+            Sets are required.
+          </div>
+          <div *ngIf="sets.errors?.['min']">
+            Sets must be at least 1.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reps">Reps:</label>
+        <input type="number" id="reps" name="reps" [(ngModel)]="newExercise.reps" required #reps="ngModel" min="1">
+        <div *ngIf="reps.invalid && (reps.dirty || reps.touched)" class="error">
+          <div *ngIf="reps.errors?.['required']">
+            Reps are required.
+          </div>
+          <div *ngIf="reps.errors?.['min']">
+            Reps must be at least 1.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="weight">Weight (kg):</label>
+        <input type="number" id="weight" name="weight" [(ngModel)]="newExercise.weightInKgs">
+      </div>
+      <div class="form-group">
+        <label for="rest">Rest Time (seconds):</label>
+        <input type="number" id="rest" name="rest" [(ngModel)]="newExercise.restBetweenSetsSeconds">
+      </div>
+      <div class="form-group">
+        <label for="notes">Notes:</label>
+        <textarea id="notes" name="notes" [(ngModel)]="newExercise.instructions"></textarea>
+      </div>
+      <button type="submit" [disabled]="exerciseForm.invalid">Add</button>
+    </form>
+  </div>
+</div>
+

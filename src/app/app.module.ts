@@ -7,8 +7,6 @@ import { NgModule } from '@angular/core';
 import { NutritionComponent } from './components/nutrition/nutrition.component';
 import { TrainingComponent } from './components/training/training.component';
 import { MainLayoutComponent } from './components/main-layout/main-layout.component';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
-+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [

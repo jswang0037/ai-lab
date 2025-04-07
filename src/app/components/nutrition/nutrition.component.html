@@ -57,33 +57,33 @@
       </div>
       <button type="submit">Add</button>
     </form>
-+  </div>
-+  <div class="food-log" *ngIf="foodLog.length > 0">
-+    <h2>Food Intake Log</h2>
-+    <table>
-+      <thead>
-+        <tr>
-+          <th>Food Item</th>
-+          <th>Quantity (g)</th>
-+          <th>Protein (g)</th>
-+          <th>Carbs (g)</th>
-+          <th>Fat (g)</th>
-+        </tr>
-+      </thead>
-+      <tbody>
-+        <tr *ngFor="let food of foodLog">
-+          <td>{{ food.name }}</td>
-+          <td>{{ food.quantity }}</td>
-+          <td>{{ food.protein }}</td>
-+          <td>{{ food.carbs }}</td>
-+          <td>{{ food.fat }}</td>
-+        </tr>
-+      </tbody>
-+    </table>
-+  </div>
-+  <div class="macronutrient-chart">
-+    <h2>Macronutrient Distribution</h2>
-+    <!-- Placeholder for chart rendering -->
-+    <canvas id="macronutrientChart"></canvas>
-+  </div>
-+</div>
+  </div>
+  <div class="food-log" *ngIf="foodLog.length > 0">
+    <h2>Food Intake Log</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Food Item</th>
+          <th>Quantity (g)</th>
+          <th>Protein (g)</th>
+          <th>Carbs (g)</th>
+          <th>Fat (g)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let food of foodLog">
+          <td>{{ food.name }}</td>
+          <td>{{ food.quantity }}</td>
+          <td>{{ food.protein }}</td>
+          <td>{{ food.carbs }}</td>
+          <td>{{ food.fat }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="macronutrient-chart">
+    <h2>Macronutrient Distribution</h2>
+    <!-- Placeholder for chart rendering -->
+    <canvas id="macronutrientChart"></canvas>
+  </div>
+</div>
