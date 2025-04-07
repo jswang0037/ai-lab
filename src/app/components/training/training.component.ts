@@ -20,11 +20,27 @@ export interface ExercisePlan {
   weeklySchedule: DailySchedule[];
 }
 
+export interface NewExercise {
+  name: string;
+  sets: number;
+  reps: number;
+  weightInKgs?: number;
+  restBetweenSetsSeconds?: number;
+  instructions?: string;
+ }
+
 @Component({
   selector: 'app-training',
   templateUrl: './training.component.html',
   styleUrls: ['./training.component.scss']
 })
-export class TrainingComponent {
+ export class TrainingComponent {
   @Input() exercisePlan!: ExercisePlan;
+  newExercise: NewExercise = { name: '', sets: 0, reps: 0 };
+  workoutLog: NewExercise[] = [];
+
+  addExercise() {
+    this.workoutLog.push({ ...this.newExercise });
+    this.newExercise = { name: '', sets: 0, reps: 0 };
+  }
 }
