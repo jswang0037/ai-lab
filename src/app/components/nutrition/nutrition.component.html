@@ -1,23 +1,89 @@
-<div *ngIf="nutritionPlan">
-  <h1>{{ nutritionPlan.notes}}</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Target Calories (Kcal)</th>
-        <th>Protein (g)</th>
-        <th>Carbs (g)</th>
-        <th>Fat (g)</th>
-        <th>Water (Lml)</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>{{ nutritionPlan.dailyTargets.targetCalories }}</td>
-        <td>{{ nutritionPlan.dailyTargets.proteinInGrams }}</td>
-        <td>{{ nutritionPlan.dailyTargets.carbohydrateInGrams }}</td>
-        <td>{{ nutritionPlan.dailyTargets.fatInGrams }}</td>
-        <td>{{ nutritionPlan.dailyTargets.waterInMilliliters }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+<div *ngIf="nutritionPlan" class="nutrition-container">
+  <h1>{{ nutritionPlan.notes }}</h1>
+  <div class="nutrition-cards">
+    <div class="nutrition-card">
+      <div class="card-content">
+        <span class="card-title">Target Calories</span>
+        <span class="card-value">{{ nutritionPlan.dailyTargets.targetCalories }} Kcal</span>
+      </div>
+    </div>
+    <div class="nutrition-card">
+      <div class="card-content">
+        <span class="card-title">Protein</span>
+        <span class="card-value">{{ nutritionPlan.dailyTargets.proteinInGrams }} g</span>
+      </div>
+    </div>
+    <div class="nutrition-card">
+      <div class="card-content">
+        <span class="card-title">Carbohydrates</span>
+        <span class="card-value">{{ nutritionPlan.dailyTargets.carbohydrateInGrams }} g</span>
+      </div>
+    </div>
+    <div class="nutrition-card">
+      <div class="card-content">
+        <span class="card-title">Fat</span>
+        <span class="card-value">{{ nutritionPlan.dailyTargets.fatInGrams }} g</span>
+      </div>
+    </div>
+    <div class="nutrition-card">
+      <div class="card-content">
+        <span class="card-title">Water</span>
+        <span class="card-value">{{ nutritionPlan.dailyTargets.waterInMilliliters }} ml</span>
+      </div>
+    </div>
+  </div>
+  <div class="food-intake-form">
+    <h2>Add Food Intake</h2>
+    <form (ngSubmit)="addFoodIntake()">
+      <div class="form-group">
+        <label for="foodItem">Food Item:</label>
+        <input type="text" id="foodItem" name="foodItem" [(ngModel)]="newFood.name">
+      </div>
+      <div class="form-group">
+        <label for="quantity">Quantity (g):</label>
+        <input type="number" id="quantity" name="quantity" [(ngModel)]="newFood.quantity">
+      </div>
+      <div class="form-group">
+        <label for="protein">Protein (g):</label>
+        <input type="number" id="protein" name="protein" [(ngModel)]="newFood.protein">
+      </div>
+      <div class="form-group">
+        <label for="carbs">Carbs (g):</label>
+        <input type="number" id="carbs" name="carbs" [(ngModel)]="newFood.carbs">
+      </div>
+      <div class="form-group">
+        <label for="fat">Fat (g):</label>
+        <input type="number" id="fat" name="fat" [(ngModel)]="newFood.fat">
+      </div>
+      <button type="submit">Add</button>
+    </form>
++  </div>
++  <div class="food-log" *ngIf="foodLog.length > 0">
++    <h2>Food Intake Log</h2>
++    <table>
++      <thead>
++        <tr>
++          <th>Food Item</th>
++          <th>Quantity (g)</th>
++          <th>Protein (g)</th>
++          <th>Carbs (g)</th>
++          <th>Fat (g)</th>
++        </tr>
++      </thead>
++      <tbody>
++        <tr *ngFor="let food of foodLog">
++          <td>{{ food.name }}</td>
++          <td>{{ food.quantity }}</td>
++          <td>{{ food.protein }}</td>
++          <td>{{ food.carbs }}</td>
++          <td>{{ food.fat }}</td>
++        </tr>
++      </tbody>
++    </table>
++  </div>
++  <div class="macronutrient-chart">
++    <h2>Macronutrient Distribution</h2>
++    <!-- Placeholder for chart rendering -->
++    <canvas id="macronutrientChart"></canvas>
++  </div>
++</div>
