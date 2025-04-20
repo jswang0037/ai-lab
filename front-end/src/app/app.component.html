@@ -20,11 +20,6 @@
               <input class="form-check-input" type="radio" name="options" [value]="userTextInput" [checked]="question.options.length === 0">
               <input class="form-input" type="text" [value]="" [(ngModel)]="userTextInput">
             </div>
-            <div class="mb-3">
-              <label for="imageUpload" class="form-label">Attach Image:</label>
-              <input type="file" class="form-control" id="imageUpload" accept="image/*" (change)="onFileSelected($event)">
-            </div>
-            <img *ngIf="selectedImagePreview" [src]="selectedImagePreview" alt="Selected Image" class="img-fluid mt-2">
           </div>
           <div class="d-grid">
             <button class="btn btn-primary" type="button" (click)="submit()" [innerText]="question.options.length > 0? 'Submit': 'Got it'"></button>
