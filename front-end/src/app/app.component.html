@@ -1,4 +1,9 @@
 <div class="container mt-5" *ngIf="!isLoading">
+  <!-- Error Message Display -->
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
   <div class="row justify-content-center">
     <div class="col-md-6" *ngFor="let question of questions">
       <div class="card">
@@ -12,27 +17,46 @@
           </div>
           <div class="mb-3">
             <label class="form-label">Select an option:</label>
+            <!-- Radio buttons using ngModel -->
             <div *ngFor="let option of question.options; let i = index" class="form-check">
-              <input class="form-check-input" type="radio" name="options" [id]="'option' + i" [value]="option">
+              <input class="form-check-input"
+                     type="radio"
+                     name="dynamicOptions" <!-- Use a consistent name -->
+                     [id]="'option' + i"
+                     [value]="option"
+                     [(ngModel)]="selectedOption"> <!-- Bind to selectedOption -->
               <label class="form-check-label" [for]="'option' + i">{{ option }}</label>
             </div>
+            <!-- Text Input as a fallback/alternative -->
             <div class="form-check">
-              <input class="form-check-input" type="radio" name="options" [value]="userTextInput" [checked]="question.options.length === 0">
-              <input class="form-input" type="text" [value]="" [(ngModel)]="userTextInput">
+               <!-- Consider if this radio input is still needed with the text input -->
+               <!-- If the text input should *override* radio selection, ngModel might not be needed on this radio -->
+              <input class="form-check-input"
+                     type="radio"
+                     name="dynamicOptions" <!-- Same name -->
+                     [value]="userTextInput"
+                     [checked]="question.options.length === 0 || !selectedOption"
+                     [(ngModel)]="selectedOption"> <!-- Also binds? Review logic -->
+              <label class="form-check-label">
+                Or enter text:
+                <input class="form-input ms-2" type="text" [(ngModel)]="userTextInput" (ngModelChange)="clearRadioSelection()"> <!-- Use ngModelChange to clear radio if text is entered -->
+              </label>
             </div>
           </div>
           <div class="d-grid">
-            <button class="btn btn-primary" type="button" (click)="submit()" [innerText]="question.options.length > 0? 'Submit': 'Got it'"></button>
+            <!-- Disable button while loading -->
+            <button class="btn btn-primary" type="button" (click)="submit()" [disabled]="isLoading" [innerText]="isLoading ? 'Loading...' : (question.options.length > 0 ? 'Submit Option' : 'Submit Text')"></button>
           </div>
         </div>
       </div>
     </div>
-    <div class="row mt-3" *ngIf="exercisePlan">
+    <!-- Plan Components -->
+    <div class="row mt-3" *ngIf="exercisePlan && !isLoading">
       <div class="col-12">
         <app-training [exercisePlan]="exercisePlan"></app-training>
       </div>
     </div>
-    <div class="row mt-3" *ngIf="nutritionPlan">
+    <div class="row mt-3" *ngIf="nutritionPlan && !isLoading">
       <div class="col-12">
         <app-nutrition [nutritionPlan]="nutritionPlan"></app-nutrition>
       </div>
@@ -40,6 +64,9 @@
   </div>
 </div>
 
-<div class="spinner-border" role="status" *ngIf="isLoading">
-  <span class="visually-hidden">Loading...</span>
+<!-- Loading Spinner -->
+<div class="d-flex justify-content-center mt-5" *ngIf="isLoading">
+  <div class="spinner-border" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
 </div>

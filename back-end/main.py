@@ -1,212 +1,152 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, HTTPException, status # Added HTTPException, status
 from uvicorn import run
-from google import genai
 from fastapi.middleware.cors import CORSMiddleware
-from google.genai import types
 import json
 import os
+from typing import List, Dict, Any
 
-client = genai.Client(
-    api_key="AIzaSyDbrLFuGRfnA34hmo00_MIaVuguC8N_vjc"
-)
+# --- Configuration Loading ---
+
+# Read API key (needed by service, but read here for potential future use or validation)
+# genai_api_key: str = os.getenv("GENAI_API_KEY") # No longer needed directly in main.py
+# if not genai_api_key:
+#     raise ValueError("GENAI_API_KEY environment variable not set.")
+
+# Read allowed origins from environment variable, default if not set
+allowed_origins_str: str = os.getenv("ALLOWED_ORIGINS", "http://localhost:4200,https://localhost:4200")
+allow_origins: List[str] = [origin.strip() for origin in allowed_origins_str.split(',')]
+
+# Read model names from environment variables, default if not set
+chat_model_name: str = os.getenv("CHAT_MODEL_NAME", "gemini-2.0-flash")
+parse_model_name: str = os.getenv("PARSE_MODEL_NAME", "gemini-2.0-flash-lite")
+
+# Load system instructions from files
+def load_instruction(filepath: str) -> str:
+    try:
+        # Construct path relative to this file's directory
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        full_path = os.path.join(dir_path, filepath)
+        with open(full_path, "r", encoding="utf-8") as f:
+            return f.read()
+    except FileNotFoundError:
+        # Provide a more informative error if the file is missing
+        raise RuntimeError(f"System instruction file not found at expected path: {full_path}")
+    except Exception as e:
+        raise RuntimeError(f"Error loading system instruction from {full_path}: {e}")
+
+# Relative paths from main.py's location
+chat_system_instruction_text: str = load_instruction("prompts/chat_system_instruction.txt")
+parse_system_instruction_text: str = load_instruction("prompts/parse_system_instruction.txt")
 
 
-def parseContents(contents):
-    res = []
-    for content in contents:
-        res.append(
-            types.Content(
-                role=content["role"],
-                parts=[
-                    types.Part.from_text(text=content["text"]),
-                ],
-            ))
-    return res
+# --- GenAI Service Import ---
+# Ensure the service file is in the python path or use relative import if structured as a package
+try:
+    from services.genai_service import generate_chat_response, parse_text_with_options
+except ImportError as e:
+    raise RuntimeError(f"Could not import from services.genai_service. Ensure it's in the Python path or structured correctly. Error: {e}")
 
 
+# --- FastAPI App Setup ---
 app = FastAPI()
-allow_origins = ["http://localhost:4200",
-                 "https://localhost:4200"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"], # Allow all standard methods
+    allow_headers=["*"], # Allow all headers
 )
 
 
+# --- API Endpoints ---
+
 @app.post("/chat")
 async def generate(req: Request):
-    payload = json.loads(await req.body())
-    # payload = {
-    #     contents = [{role, text}, ...]
-    #     text
-    # }
+    """
+    Handles chat requests by calling the GenAI service.
+    """
+    try:
+        payload: Dict[str, Any] = await req.json() # Use await req.json() for parsing
+        history_contents = payload.get("contents")
+        new_text = payload.get("text")
 
-    model = "gemini-2.0-flash"
-    contents = parseContents(payload["contents"])
-    contents.append(
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text=payload["text"]),
-            ],
-        ))
-    config = types.GenerateContentConfig(
-        response_mime_type="text/plain",
-        system_instruction=[
-            types.Part.from_text(text="""
-目標和職責：
+        if not isinstance(history_contents, list) or not isinstance(new_text, str):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid payload format: 'contents' must be a list and 'text' must be a string."
+            )
 
-* 作為營養師和健身教練，根據使用者的需求（如減肥、增加肌肉、減少脂肪），制定每週所需的營養（碳水化合物、脂肪、蛋白質和總卡路里）。
-
-* 根據使用者的運動頻率和運動地點，安排相關的有氧運動或重量訓練課程表。
-
-* 方便使用者回答，提供選項給使用者選擇，不要提出開放性問答（除了身高體重等資訊需要用戶輸入）。
-
-* 無須複述用戶的回覆。           
-                                 
-* 一次僅詢問一個問題。
-
-                                 
-依序詢問：
-1) 詢問使用者的目標，例如：
-    * 增加肌肉
-    * 減少脂肪
-
-2) 詢問使用者每週的運動頻率，例如：
-    * 1 次
-    * 2 次
-    * 3 次
-    * 4 次
-    * 5 次
-                                 
-3) 詢問使用者每次的運動時長，例如：
-    * 30分鐘  
-    * 45分鐘
-    * 60分鐘
-
-4) 詢問使用者運動地點，例如：
-    * 健身房
-    * 家裡
-    * 戶外
-                                
-5) 詢問使用者的身高（公分）
-6) 詢問使用者的體重（公斤）
-7) 詢問使用者是否有其他要補充的
-
-營養建議：
-1) 根據使用者的目標，提供當週所需的營養建議，包括碳水化合物、脂肪、蛋白質和總卡路里。
-
-
-運動建議：
-1) 根據使用者的運動頻率、運動地點和運動時長，安排相關的有氧運動或重量訓練課程表。
-2) 提供運動步驟和注意事項。
-3) 提供運動強度建議。
-4) 註明使用的器材（如啞鈴、槓鈴）
-5) 註明重訓的組數、重量以及次數（如 X組, Y 公斤, 每組Z下)
-6) 重量訓練課程表安排4-5組不同的運動
-                                 
-
-回復格式：
-同時回答營養和運動建議，使用以下JSON格式（以下僅為範例，須根據用戶輸入更換）：
-
-{
-  "nutritionPlan": {
-    "notes": "配合增肌減脂目標，確保足夠蛋白質攝取，控制總熱量。",
-    "dailyTargets": {
-      "targetCalories": 2200, // 目標總熱量 (大卡)
-      "proteinInGrams": 150, // 蛋白質 (克)
-      "carbohydrateInGrams": 230, // 碳水化合物 (克)
-      "fatInGrams": 73, // 脂肪 (克)
-      "waterInMilliliters": 3000 // 目標飲水量 (毫升)
-    }
-  },
-  "exercisePlan": {
-    "notes": "第一階段，著重基礎力量建立和動作熟悉度。",
-    "weeklySchedule": [
-        {
-          "dayOfWeek": "Monday", // 或 Day 1
-          "workoutType": "Upper Body Strength", // 上半身力量
-          "estimatedDurationMinutes": 60, //預估時間
-          "exercises": [
-            {
-              "name": "槓鈴臥推 (Barbell Bench Press)",
-              "equipment": ["槓鈴", "臥推椅"],
-              "sets": 3,
-              "reps": 8,
-              "weightInKgs": 50, // 目標重量 (kg)
-              "restBetweenSetsSeconds": 90,
-              "instructions": "控制離心速度，感受胸部發力。",
-            },
-            {
-              "exerciseName": "啞鈴划船 (Dumbbell Row)",
-              "equipment": ["啞鈴", "長椅"],
-              "targetSets": 3,
-              "targetReps": 10, 
-              "targetWeightKg": 15,
-              "restBetweenSetsSeconds": 75,
-              "instructions": "保持背部挺直，專注背肌收縮。",
-            },
-        },
-      ]
-    }
-}
-
-
-
-整體語氣：
-* 使用專業、友善的語言。
-* 以鼓勵和支持的態度引導使用者。
-* 讓使用者感到他們正在與一位知識淵博的朋友交談。
-"""),
-        ],
-    )
-
-    response = client.models.generate_content(
-        model=model,
-        config=config,
-        contents=contents
-    )
-
-    # print(response.text)
-    return response.text
+        # Call the service function
+        response_text = await generate_chat_response(
+            model_name=chat_model_name,
+            system_instruction_text=chat_system_instruction_text,
+            history_contents_dicts=history_contents,
+            new_user_text=new_text
+        )
+        # Return plain text response
+        # Use Response class for explicit media type if needed, but FastAPI handles text fine
+        return response_text
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON received in request body."
+        )
+    except HTTPException as e:
+        # Re-raise HTTPExceptions raised by the service or validation
+        raise e
+    except Exception as e:
+        # Catch-all for unexpected errors in the endpoint logic itself
+        print(f"Unexpected error in /chat endpoint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unexpected server error occurred: {e}"
+        )
 
 
 @app.post("/parse")
 async def parse(req: Request):
-    payload = json.loads(await req.body())
-    # print("parse start")
-    # print("payload", payload)
+    """
+    Handles text parsing requests by calling the GenAI service.
+    """
+    try:
+        payload: Dict[str, Any] = await req.json() # Use await req.json()
+        text_to_parse = payload.get("text")
 
-    model = "gemini-2.0-flash-lite"
-    contents = payload["text"]
-    config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        system_instruction=[
-            types.Part.from_text(text="""
-If the input contains the string 'nutritionPlan', return it as valid JSON format. 
-Otherwise, parse the input question into a JSON array of objects with length 1. 
-Object should have two keys: 'text' (the original text segment) and 'options' (an array of strings representing the extracted options from that segment). 
-Provide an example of the expected output format:
+        if not isinstance(text_to_parse, str):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid payload format: 'text' must be a string."
+            )
 
-Example of the desired output format:
-{
-  "text": "Some text with options:",
-  "options": ["Option A", "Option B"]
-}
-""")
-        ],
-    )
+        # Call the service function
+        parsed_data = await parse_text_with_options(
+            model_name=parse_model_name,
+            system_instruction_text=parse_system_instruction_text,
+            text_to_parse=text_to_parse
+        )
+        # Return the parsed JSON data
+        return parsed_data
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON received in request body."
+        )
+    except HTTPException as e:
+        # Re-raise HTTPExceptions raised by the service or validation
+        raise e
+    except Exception as e:
+        # Catch-all for unexpected errors in the endpoint logic itself
+        print(f"Unexpected error in /parse endpoint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unexpected server error occurred: {e}"
+        )
 
-    response = client.models.generate_content(
-        model=model,
-        config=config,
-        contents=contents
-    )
-    return json.loads(response.text)
 
-
+# --- Main Execution Guard ---
 if __name__ == "__main__":
-    run(app, host="0.0.0.0", port=8000)
+    # Default host and port, can be overridden by environment variables if needed
+    app_host = os.getenv("APP_HOST", "0.0.0.0")
+    app_port = int(os.getenv("APP_PORT", "8000"))
+    print(f"Starting server on {app_host}:{app_port}")
+    run(app, host=app_host, port=app_port)

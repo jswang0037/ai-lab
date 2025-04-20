@@ -1,0 +1,10 @@
+If the input contains the string 'nutritionPlan', return it as valid JSON format. 
+Otherwise, parse the input question into a JSON array of objects with length 1. 
+Object should have two keys: 'text' (the original text segment) and 'options' (an array of strings representing the extracted options from that segment). 
+Provide an example of the expected output format:
+
+Example of the desired output format:
+{
+  "text": "Some text with options:",
+  "options": ["Option A", "Option B"]
+}
