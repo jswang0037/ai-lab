@@ -18,6 +18,7 @@ enum Role {
 interface Content {
   role: Role;
   text: string;
+  filename?: string;
 }
 
 interface ChatReqAttr {
@@ -52,6 +53,30 @@ export class AppComponent implements OnInit {
 
   exercisePlan!: ExercisePlan; // Initialize with empty array
   nutritionPlan! : DailyNutrition; // Initialize with empty array
+  selectedFile: File | null = null; // To store the actual file for upload
+  selectedImagePreview: string | ArrayBuffer | null = null; // To store the Data URL for preview
+
+  onFileSelected(event: any) {
+    const file: File | undefined = event.target.files?.[0]; // Get the File object safely
+    if (file) {
+      this.selectedFile = file; // <-- Store the File object
+      this.selectedImagePreview = null; // Reset preview
+
+      // --- Read the file for preview ---
+      const reader = new FileReader();
+      reader.readAsDataURL(file); // Read as Data URL
+      reader.onload = (e) => {
+        // Store the result (which is a string) for preview
+        this.selectedImagePreview = e.target?.result ?? null;
+      };
+      // --- End reading for preview ---
+
+    } else {
+      // No file selected or selection cancelled
+      this.selectedFile = null;
+      this.selectedImagePreview = null;
+    }
+  }
 
 
   submit() {
@@ -91,18 +116,28 @@ export class AppComponent implements OnInit {
     this.isLoading = true;
     this.history.push({
       role: Role.User,
-      text: text
+      text: text,
+      filename: this.selectedFile?.name
     });
-    const body = {
-      contents: this.history,
-      text: text
-    };
-    this.http.post<string>(this.url + '/chat', body).subscribe(res => {
+
+    const formData = new FormData();
+    formData.append('text', text);
+    formData.append('history', JSON.stringify(this.history));
+
+    if (this.selectedFile) {
+      // 'file' is the key the backend will look for.
+      // The third argument is the filename the server will receive.
+      formData.append('file', this.selectedFile, this.selectedFile.name);
+    }
+    this.http.post<string>(this.url + '/chat', formData).subscribe(res => {
       this.history.push({
         role: Role.Model,
-        text: res
+        text: res,
       });
       this.parseQuestion(res);
+
+      this.selectedFile = null;
+      this.selectedImagePreview = null;
     });
   }
 
