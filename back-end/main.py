@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, File, UploadFile, HTTPException
+from typing import List, Dict, Any, Optional  # Need Optional for the file
 from uvicorn import run
 from google import genai
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,20 +8,41 @@ import json
 import os
 
 client = genai.Client(
-    api_key="AIzaSyDbrLFuGRfnA34hmo00_MIaVuguC8N_vjc"
+    api_key="AIzaSyBA0dCFFT4a31azI8pkggmcwYZDlnbf56I"
 )
+
+files_in_gemini = []
+files = []
 
 
 def parseContents(contents):
     res = []
-    for content in contents:
+
+    for content in json.loads(contents):
+        parts = [types.Part.from_text(text=content["text"])]
+
+        if "filename" in content:
+            filename = content["filename"]
+            _file = files_in_gemini[files.index(filename)]
+            if _file != None:
+                parts.append(
+                    types.Part.from_uri(
+                        file_uri=_file.uri,
+                        mime_type=_file.mime_type,
+                    ),
+                )
+
         res.append(
             types.Content(
                 role=content["role"],
-                parts=[
-                    types.Part.from_text(text=content["text"]),
-                ],
+                parts=parts,
             ))
+
+    for r in res:
+        print("role:", r.role)
+        for p in r.parts:
+            print("\t", p.text, p.file_data)
+
     return res
 
 
@@ -37,22 +59,18 @@ app.add_middleware(
 
 
 @app.post("/chat")
-async def generate(req: Request):
-    payload = json.loads(await req.body())
+async def generate(
+    text: str = Form(...),
+    history: str = Form(...),  # History is received as a JSON string
+    file: Optional[UploadFile] = File(None)
+):
+    # payload = json.loads(await req.body())
     # payload = {
     #     contents = [{role, text}, ...]
     #     text
     # }
 
     model = "gemini-2.0-flash"
-    contents = parseContents(payload["contents"])
-    contents.append(
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text=payload["text"]),
-            ],
-        ))
     config = types.GenerateContentConfig(
         response_mime_type="text/plain",
         system_instruction=[
@@ -163,6 +181,32 @@ async def generate(req: Request):
 """),
         ],
     )
+
+    global files, files_in_gemini
+
+    if file:
+        # Basic validation (optional but recommended)
+        if not file.content_type:
+            raise HTTPException(
+                status_code=400, detail="Could not determine file type.")
+        if file.size == 0:
+            raise HTTPException(
+                status_code=400, detail="Uploaded file is empty.")
+
+        # Logging
+        print(
+            f"Received file: {file.filename}, Type: {file.content_type}, Size: {file.size}")
+
+        # save file
+        with open(file.filename, "wb") as f:
+            f.write(await file.read())
+
+        files_in_gemini.append(
+            client.files.upload(file=file.filename),
+        )
+        files.append(file.filename)
+
+    contents = parseContents(history)
 
     response = client.models.generate_content(
         model=model,
